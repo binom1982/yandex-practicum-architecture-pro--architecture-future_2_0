@@ -15,3 +15,18 @@
 export AWS_ACCESS_KEY_ID="ваш_Key_ID"
 export AWS_SECRET_ACCESS_KEY="ваш_Secret_Key"
 ```
+
+
+## Структура проекта
+
+```bash
+Task2Advanced/
+├── backend.tf              # Настройки удалённого хранилища состояния (из Шага 1)
+├── provider.tf             # Настройки провайдера Yandex Cloud
+├── main.tf                 # Основной код инфраструктуры
+├── variables.tf            # Входные переменные
+├── outputs.tf              # Выходные значения
+├── terraform.tfvars        # Значения переменных
+└── .github/workflows/
+    └── terraform.yml       # CI/CD пайплайн (GitHub Actions)
+```

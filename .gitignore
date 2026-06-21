@@ -1,0 +1,6 @@
+# Исключаем файл с реальными значениями для локальной разработки
+terraform.tfvars
+
+terraform_key
+terraform_key.pub
+

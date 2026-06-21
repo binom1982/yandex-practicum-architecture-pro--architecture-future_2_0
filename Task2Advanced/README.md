@@ -23,7 +23,7 @@ Task2Advanced/
 ├── main.tf                 # Основной код инфраструктуры
 ├── variables.tf            # Входные переменные
 ├── outputs.tf              # Выходные значения
-├── terraform.tfvars        # Значения переменных
+├── terraform.tfvars.example        # Значения переменных
 └── .github/workflows/
     └── terraform.yml       # CI/CD пайплайн (GitHub Actions)
 ```

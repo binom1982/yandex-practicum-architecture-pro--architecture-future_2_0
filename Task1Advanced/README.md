@@ -70,8 +70,8 @@
 # Пример для dev. Аналогично для stage и prod.
 cd envs/dev
 terraform init
-terraform plan -var-file=terraform.tfvars
-terraform apply -var-file=terraform.tfvars
+terraform plan -var-file=terraform.tfvars.example
+terraform apply -var-file=terraform.tfvars.example
 ```
 
 Просмотр выходов
@@ -83,5 +83,5 @@ terraform output
 Удаление ресурсов
 
 ```bash
-terraform destroy -var-file=terraform.tfvars
+terraform destroy -var-file=terraform.tfvars.example
 ```

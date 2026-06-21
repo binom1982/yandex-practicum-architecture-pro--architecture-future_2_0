@@ -24,7 +24,7 @@ Task2Advanced/
 ├── variables.tf            # Входные переменные
 ├── outputs.tf              # Выходные значения
 ├── terraform.tfvars.example        # Значения переменных
-└── .github/workflows/
+.github/workflows/
     └── terraform.yml       # CI/CD пайплайн (GitHub Actions)
 ```
 

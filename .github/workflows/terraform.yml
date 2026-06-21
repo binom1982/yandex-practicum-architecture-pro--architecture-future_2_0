@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - "Task2Advanced/**"
+      - ".github/workflows/**"
   
   # 2. Запуск при PR в ЛЮБУЮ ветку (включая main)
   pull_request:
@@ -14,6 +15,7 @@ on:
       - "**"  # Любая ветка
     paths:
       - "Task2Advanced/**"
+      - ".github/workflows/**"
   
   # 3. Ручной запуск из UI GitHub
   workflow_dispatch:

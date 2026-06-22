@@ -13,11 +13,11 @@ System_Boundary(enterprise, "Предприятие «Будущее 2.0» (Ente
 
     ' === ДОМЕН: МЕДИЦИНА (Core Domain) ===
     Boundary(medical, "Домен «Медицина» (Core Domain)") {
-        Boundary(bc_patient, "BC «Пациентский поток»") {
+        Boundary(bc_patient, "«Пациентский поток» (Bounded Context)") {
             Container(med_app, "Patient Flow Service", "Golang / K8s", "Запись, приёмы, расписание")
             ContainerDb(med_db, "Patient DB", "PostgreSQL", "Пациенты, записи, посещения")
         }
-        Boundary(bc_record, "BC «Медицинская карта»") {
+        Boundary(bc_record, "«Медицинская карта» (Bounded Context)") {
             Container(record_app, "Medical Record Service", "Golang", "ЭМК, диагнозы, анамнез")
             ContainerDb(record_db, "Record DB", "PostgreSQL", "Мед. карты, диагнозы")
             ContainerDb(record_storage, "Object Storage", "S3", "DICOM-снимки, вложения")
@@ -27,7 +27,7 @@ System_Boundary(enterprise, "Предприятие «Будущее 2.0» (Ente
 
     ' === ДОМЕН: ФИНТЕХ (Core Domain) ===
     Boundary(fintech, "Домен «Финтех» (Core Domain)") {
-        Boundary(bc_fintech, "BC «Финансовые сервисы»") {
+        Boundary(bc_fintech, "«Финансовые сервисы» (Bounded Context)") {
             Container(fin_app, "Fintech Core Service", "Golang + Java", "Счета, кредиты, платежи")
             ContainerDb(fin_db, "Fintech DB", "PostgreSQL", "Счета, договоры, транзакции")
         }
@@ -36,7 +36,7 @@ System_Boundary(enterprise, "Предприятие «Будущее 2.0» (Ente
 
     ' === ДОМЕН: ИИ (Supporting Subdomain) ===
     Boundary(ai, "Домен «ИИ-сервисы» (Supporting Subdomain)") {
-        Boundary(bc_ai, "BC «ИИ-диагностика»") {
+        Boundary(bc_ai, "«ИИ-диагностика» (Bounded Context)") {
             Container(ai_app, "AI Diagnostics Service", "Python / MLflow", "Анализ снимков и данных")
             ContainerDb(ai_model, "Model Registry", "MLflow + S3", "Версии моделей и артефакты")
         }

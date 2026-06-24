@@ -1,6 +1,10 @@
 @startuml
+!NEW_C4_STYLE=1
+!theme C4_sandstone from <C4/themes>
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
+SHOW_PERSON_OUTLINE()
+LAYOUT_LANDSCAPE()
 title C4 — Component Diagram\nSelf-Service BI Portal\n(Портал самообслуживания для бизнес-пользователей)
 
 ' === Внешние пользователи ===

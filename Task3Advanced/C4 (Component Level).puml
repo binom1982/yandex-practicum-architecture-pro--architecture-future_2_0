@@ -1,0 +1,91 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 — Component Diagram\nSelf-Service BI Portal\n(Портал самообслуживания для бизнес-пользователей)
+
+' === Внешние пользователи ===
+Person(user_analyst, "BI-аналитик", "Строит отчёты, анализирует данные")
+Person(user_manager, "Руководитель", "Просит готовые дашборды")
+Person(user_compliance, "Compliance-офицер", "Проверяет аудит и доступы")
+
+' === Внешние контейнеры ===
+Container(stream_dw, "Streaming DW", "ClickHouse + Iceberg", "Витрины данных по доменам")
+Container(data_catalog, "Data Catalog", "DataHub", "Метаданные, глоссарий, lineage")
+Container(event_bus, "Event Bus", "Apache Kafka", "События изменения данных")
+ContainerDb(legacy_dwh, "Legacy DWH", "MS SQL Server 2008", "Временный доступ через CDC")
+
+' === Self-Service BI Portal (контейнер) ===
+Container_Boundary(bi_portal, "Self-Service BI Portal") {
+    
+    Component(api_gateway, "API Gateway", "Kong / NGINX", "Единая точка входа, маршрутизация, rate limiting")
+    
+    Component(auth_service, "Auth & RBAC Service", "Keycloak + OAuth2", "Аутентификация (SSO/LDAP), авторизация, контроль доступа к данным")
+    
+    Component(query_engine, "Query Engine", "Trino", "Выполнение SQL-запросов, federation, оптимизация")
+    
+    Component(metadata_service, "Metadata Service", "Custom + DataHub API", "Поиск данных, бизнес-глоссарий, lineage")
+    
+    Component(report_builder, "Report Builder", "Apache Superset / React", "Конструктор отчётов (drag-and-drop)")
+    
+    Component(visualization_engine, "Visualization Engine", "Superset / D3.js", "Рендеринг графиков, таблиц, дашбордов")
+    
+    Component(data_connector, "Data Source Connector", "JDBC/ODBC + Redis", "Подключение к Streaming DW, кэширование")
+    
+    Component(audit_logger, "Audit Logger", "ELK Stack", "Логирование действий для compliance")
+    
+    ComponentDb(cache_layer, "Cache Layer", "Redis", "Кэш результатов запросов, сессии")
+}
+
+' === Связи: Пользователи → Портал ===
+Rel(user_analyst, api_gateway, "HTTP/HTTPS", "Запросы к API")
+Rel(user_manager, api_gateway, "HTTP/HTTPS", "Просмотр дашбордов")
+Rel(user_compliance, audit_logger, "Проверка аудитов")
+
+' === Связи: API Gateway → внутренние компоненты ===
+Rel(api_gateway, auth_service, "Проверка токена")
+Rel(api_gateway, report_builder, "Маршрутизация запросов")
+Rel(api_gateway, metadata_service, "Поиск данных")
+
+' === Связи: Auth → другие компоненты ===
+Rel(auth_service, report_builder, "Права доступа")
+Rel(auth_service, query_engine, "Row-level security")
+
+' === Связи: Report Builder → внутренние компоненты ===
+Rel(report_builder, query_engine, "SQL-запросы")
+Rel(report_builder, visualization_engine, "Рендеринг графиков")
+Rel(report_builder, metadata_service, "Получение метаданных")
+
+' === Связи: Query Engine → внешние хранилища ===
+Rel(query_engine, data_connector, "JDBC/ODBC")
+Rel(data_connector, stream_dw, "SQL-запросы")
+Rel(data_connector, legacy_dwh, "SQL-запросы (временный доступ)")
+Rel(data_connector, cache_layer, "Чтение/запись кэша")
+
+' === Связи: Metadata Service → Data Catalog ===
+Rel(metadata_service, data_catalog, "REST API", "Получение метаданных")
+
+' === Связи: Audit Logger → все компоненты ===
+Rel(report_builder, audit_logger, "Логирование действий")
+Rel(query_engine, audit_logger, "Логирование запросов")
+Rel(auth_service, audit_logger, "Логирование доступов")
+
+' === Связи: Event Bus → Портал (уведомления) ===
+Rel(event_bus, metadata_service, "Подписка на события", "Изменения в витринах")
+
+' === Примечания ===
+note right of bi_portal
+  **Важно:**
+  Медицинские карты, истории болезней
+  и результаты исследований
+  **НЕ ДОСТУПНЫ** в этом портале
+  (требование 152-ФЗ)
+end note
+
+note bottom of query_engine
+  **Federation:**
+  Trino объединяет данные
+  из Streaming DW и Legacy DWH
+  в единый SQL-запрос
+end note
+
+@enduml

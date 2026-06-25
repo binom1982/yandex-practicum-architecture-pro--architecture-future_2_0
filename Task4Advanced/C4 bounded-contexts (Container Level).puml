@@ -1,5 +1,9 @@
 @startuml
+!NEW_C4_STYLE=1
+!theme C4_sandstone from <C4/themes>
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+SHOW_PERSON_OUTLINE()
+LAYOUT_LANDSCAPE()
 
 title C4 — Container Diagram\nЦелевая архитектура «Будущее 2.0» (горизонт 3 года)\n(с корректной DDD-терминологией)
 

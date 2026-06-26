@@ -1,0 +1,297 @@
+@startuml event-storming-v3
+!theme plain
+title Event Storming :: «Будущее 2.0»\nВертикальный layout: события под агрегатами
+
+skinparam backgroundColor #FAFAFA
+skinparam defaultFontName Arial
+skinparam rectangleBorderThickness 2
+
+' === Цветовая схема Event Storming ===
+skinparam rectangle {
+  BackgroundColor<<Event>> #FFB347
+  BackgroundColor<<Command>> #ADD8E6
+  BackgroundColor<<Actor>> #FFFACD
+  BackgroundColor<<Aggregate>> #DDA0DD
+  BackgroundColor<<Policy>> #FFFFFF
+  BackgroundColor<<System>> #FFB6C1
+}
+
+' ============================================
+' ПАКЕТ 1: ПАЦИЕНТСКИЙ ПОТОК
+' ============================================
+rectangle "BC: Пациентский поток\n(Medical Domain)" as BC1 #E8F5E9 {
+  rectangle "Оператор" as Actor1 <<Actor>>
+  
+  rectangle "Регистрация" as Cmd1 <<Command>>
+  rectangle "Запись на приём" as Cmd2 <<Command>>
+  rectangle "Начало визита" as Cmd3 <<Command>>
+  
+  rectangle "Patient" as Agg1 <<Aggregate>>
+  rectangle "Appointment" as Agg2 <<Aggregate>>
+  rectangle "Visit" as Agg3 <<Aggregate>>
+  
+  rectangle "PatientRegistered" as Ev1 <<Event>>
+  rectangle "AppointmentCreated" as Ev2 <<Event>>
+  rectangle "VisitStarted" as Ev3 <<Event>>
+  rectangle "VisitCompleted" as Ev4 <<Event>>
+  
+  Actor1 -down-> Cmd1
+  Actor1 -down-> Cmd2
+  Actor1 -down-> Cmd3
+  
+  Cmd1 -down-> Agg1
+  Cmd2 -down-> Agg2
+  Cmd3 -down-> Agg3
+  
+  Agg1 -down-> Ev1
+  Agg2 -down-> Ev2
+  Agg3 -down-> Ev3
+  Agg3 -down-> Ev4
+}
+
+' ============================================
+' ПАКЕТ 2: МЕДИЦИНСКАЯ КАРТА
+' ============================================
+rectangle "BC: Медицинская карта\n(Medical Domain)" as BC2 #E8F5E9 {
+  rectangle "Врач" as Actor2 <<Actor>>
+  
+  rectangle "Установить диагноз" as Cmd4 <<Command>>
+  rectangle "Назначить исследование" as Cmd5 <<Command>>
+  
+  rectangle "MedicalRecord" as Agg4 <<Aggregate>>
+  rectangle "Study" as Agg5 <<Aggregate>>
+  
+  rectangle "DiagnosisMade" as Ev5 <<Event>>
+  rectangle "StudyRequested" as Ev6 <<Event>>
+  rectangle "StudyCompleted" as Ev7 <<Event>>
+  
+  Actor2 -down-> Cmd4
+  Actor2 -down-> Cmd5
+  
+  Cmd4 -down-> Agg4
+  Cmd5 -down-> Agg5
+  
+  Agg4 -down-> Ev5
+  Agg5 -down-> Ev6
+  Agg5 -down-> Ev7
+}
+
+' ============================================
+' ПАКЕТ 3: ИИ-ДИАГНОСТИКА
+' ============================================
+rectangle "BC: ИИ-диагностика\n(Supporting)" as BC3 #FFF8DC {
+  rectangle "AIStudy" as Agg6 <<Aggregate>>
+  
+  rectangle "AIStudyRequested" as Ev8 <<Event>>
+  rectangle "AIStudyCompleted" as Ev9 <<Event>>
+  rectangle "AIReportReady" as Ev10 <<Event>>
+  
+  Agg6 -down-> Ev8
+  Agg6 -down-> Ev9
+  Agg6 -down-> Ev10
+}
+
+' ============================================
+' ПАКЕТ 4: ИНВЕНТАРИЗАЦИЯ
+' ============================================
+rectangle "BC: Инвентаризация\n(Financial Domain)" as BC4 #FFF3E0 {
+  rectangle "Equipment" as Agg7 <<Aggregate>>
+  rectangle "EquipmentAllocated" as Ev11 <<Event>>
+  
+  Agg7 -down-> Ev11
+}
+
+' ============================================
+' ПАКЕТ 5: БИЛЛИНГ И ПЛАТЕЖИ
+' ============================================
+rectangle "BC: Биллинг и платежи\n(Financial Domain)" as BC5 #E3F2FD {
+  rectangle "Invoice" as Agg8 <<Aggregate>>
+  rectangle "Payment" as Agg9 <<Aggregate>>
+  
+  rectangle "InvoiceCreated" as Ev12 <<Event>>
+  rectangle "PaymentInitiated" as Ev13 <<Event>>
+  rectangle "PaymentProcessed" as Ev14 <<Event>>
+  rectangle "PaymentReconciled" as Ev15 <<Event>>
+  
+  Agg8 -down-> Ev12
+  Agg9 -down-> Ev13
+  Agg9 -down-> Ev14
+  Agg9 -down-> Ev15
+}
+
+' ============================================
+' ПАКЕТ 6: ФИНАНСОВЫЕ СЕРВИСЫ
+' ============================================
+rectangle "BC: Финансовые сервисы\n(Financial Domain)" as BC6 #E3F2FD {
+  rectangle "Клиент банка" as Actor4 <<Actor>>
+  
+  rectangle "BankAccount" as Agg10 <<Aggregate>>
+  rectangle "CreditAgreement" as Agg11 <<Aggregate>>
+  
+  rectangle "AccountOpened" as Ev16 <<Event>>
+  rectangle "CreditAgreementCreated" as Ev17 <<Event>>
+  rectangle "CreditApproved" as Ev18 <<Event>>
+  rectangle "CreditDisbursed" as Ev19 <<Event>>
+  
+  Actor4 -down-> Agg10
+  Actor4 -down-> Agg11
+  
+  Agg10 -down-> Ev16
+  Agg11 -down-> Ev17
+  Agg11 -down-> Ev18
+  Agg11 -down-> Ev19
+}
+
+' ============================================
+' ПАКЕТ 7: УПРАВЛЕНИЕ ПЕРСОНАЛОМ
+' ============================================
+rectangle "BC: Управление персоналом\n(Corporate Domain)" as BC7 #FFF3E0 {
+  rectangle "HR-менеджер" as Actor5 <<Actor>>
+  
+  rectangle "Schedule" as Agg12 <<Aggregate>>
+  rectangle "Employee" as Agg13 <<Aggregate>>
+  
+  rectangle "SchedulePublished" as Ev20 <<Event>>
+  rectangle "EmployeeHired" as Ev21 <<Event>>
+  
+  Actor5 -down-> Agg12
+  Actor5 -down-> Agg13
+  
+  Agg12 -down-> Ev20
+  Agg13 -down-> Ev21
+}
+
+' ============================================
+' ПАКЕТ 8: ПОРТАЛ САМООБСЛУЖИВАНИЯ
+' ============================================
+rectangle "BC: Портал самообслуживания\n(Corporate Domain)" as BC8 #FFF3E0 {
+  rectangle "BI-аналитик" as Actor6 <<Actor>>
+  
+  rectangle "DataMart" as Agg14 <<Aggregate>>
+  rectangle "ReportTemplate" as Agg15 <<Aggregate>>
+  
+  rectangle "DataMartCreated" as Ev22 <<Event>>
+  rectangle "TemplateExecuted" as Ev23 <<Event>>
+  
+  Actor6 -down-> Agg14
+  Actor6 -down-> Agg15
+  
+  Agg14 -down-> Ev22
+  Agg15 -down-> Ev23
+}
+
+' ============================================
+' ПАКЕТ 9: КОРПОРАТИВНАЯ ОТЧЁТНОСТЬ
+' ============================================
+rectangle "BC: Корпоративная отчётность\n(Corporate Domain)" as BC9 #FFF3E0 {
+  rectangle "Фин. контролёр" as Actor7 <<Actor>>
+  
+  rectangle "KPIReport" as Agg16 <<Aggregate>>
+  
+  rectangle "KPICalculated" as Ev24 <<Event>>
+  rectangle "ReportSubmitted" as Ev25 <<Event>>
+  
+  rectangle "Regulator" as Ext1 <<System>>
+  
+  Actor7 -down-> Agg16
+  Agg16 -down-> Ev24
+  Agg16 -down-> Ev25
+  Ev25 -right-> Ext1
+}
+
+' ============================================
+' ПОЛИТИКИ (Policy)
+' ============================================
+rectangle "Policy:\nтарификация" as Pol1 <<Policy>>
+rectangle "Policy:\nИИ-анализ" as Pol2 <<Policy>>
+rectangle "Policy:\nрезерв оборудования" as Pol3 <<Policy>>
+rectangle "Policy:\nCDC в витрину" as Pol4 <<Policy>>
+rectangle "Policy:\nсверка с банком" as Pol5 <<Policy>>
+
+' ============================================
+' ВЕРТИКАЛЬНОЕ РАСПОЛОЖЕНИЕ ПАКЕТОВ
+' ============================================
+BC1 -[hidden]down-> BC2
+BC2 -[hidden]down-> BC3
+BC3 -[hidden]down-> BC4
+BC4 -[hidden]down-> BC5
+BC5 -[hidden]down-> BC6
+BC6 -[hidden]down-> BC7
+BC7 -[hidden]down-> BC8
+BC8 -[hidden]down-> BC9
+
+' ============================================
+' МЕЖДОМЕННЫЕ СВЯЗИ
+' ============================================
+
+' Медицинский домен → ИИ-диагностика
+Ev6 -down-> Pol2 : StudyRequested
+Pol2 -down-> Agg6 : запустить анализ
+
+' ИИ-диагностика → Медицинская карта
+Ev10 -up-> Ev7 : AIReportReady
+
+' Пациентский поток → Инвентаризация
+Ev2 -down-> Pol3 : AppointmentCreated
+Pol3 -down-> Agg7 : резерв оборудования
+
+' Пациентский поток → Биллинг
+Ev4 -down-> Pol1 : VisitCompleted
+Pol1 -down-> Agg8 : тарификация
+
+' Биллинг: внутренние связи
+Ev12 -down-> Ev13 : InvoiceCreated
+Ev13 -down-> Ev14 : PaymentInitiated
+Ev14 -down-> Ev15 : PaymentProcessed
+
+' Управление персоналом → Пациентский поток
+Ev20 -up-> Ev2 : SchedulePublished
+Ev21 -up-> Ev2 : EmployeeHired
+
+' Все домены → Портал самообслуживания (CDC)
+Ev1 -down-> Pol4 : PatientRegistered
+Ev4 -down-> Pol4 : VisitCompleted
+Ev12 -down-> Pol4 : InvoiceCreated
+Ev15 -down-> Pol4 : PaymentReconciled
+Pol4 -down-> Agg14 : CDC в DataMart
+
+' Портал самообслуживания → Корпоративная отчётность
+Ev22 -down-> Ev23 : DataMartCreated
+Ev23 -down-> Ev24 : TemplateExecuted
+
+' Биллинг → Корпоративная отчётность
+Ev15 -down-> Pol5 : PaymentReconciled
+Pol5 -down-> Agg9 : сверить с банком
+
+' ============================================
+' ЛЕГЕНДА
+' ============================================
+legend right
+  |= Цвет |= Элемент |= Семантика |
+  | <back:#FFB347>   </back> | Domain Event | Факт, уже произошедший в домене |
+  | <back:#ADD8E6>   </back> | Command | Намерение изменить состояние |
+  | <back:#FFFACD>   </back> | Actor | Пользователь или внешняя роль |
+  | <back:#DDA0DD>   </back> | Aggregate | Граница транзакционной консистентности |
+  | <back:#FFFFFF>   </back> | Policy | Бизнес-правило, реагирующее на событие |
+  | <back:#FFB6C1>   </back> | External System | Внешняя система (регулятор) |
+endlegend
+
+note bottom of BC1
+  **Medical Domain**
+  Core: пациентский поток
+  и медицинская карта
+end note
+
+note bottom of BC5
+  **Financial Domain**
+  Отдельный контур
+  безопасности (банк. лицензия)
+end note
+
+note bottom of BC8
+  **Corporate Domain**
+  Витрина данных БЕЗ
+  ПМД и историй болезни
+end note
+
+@enduml

@@ -1,0 +1,36 @@
+# Исключаем файл с реальными значениями для локальной разработки
+terraform.tfvars
+
+terraform_key
+terraform_key.pub
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+*.tfstate.*.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Переменные с секретами
+terraform.tfvars
+*.auto.tfvars
+
+# Ключи
+*.pem
+*.key
+sa-key.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

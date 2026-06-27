@@ -1,0 +1,107 @@
+@startuml
+!NEW_C4_STYLE=1
+!theme C4_sandstone from <C4/themes>
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+SHOW_PERSON_OUTLINE()
+LAYOUT_LANDSCAPE()
+
+title C4 — Container Diagram\nЦелевая архитектура «Будущее 2.0» (горизонт 3 года)\n(с корректной DDD-терминологией)
+
+Person(user_patient, "Пациент", "Пользуется мед. и фин. сервисами")
+Person(user_doctor, "Врач", "Ведёт приём, назначает лечение")
+Person(user_operator, "Оператор клиники", "Работает с пациентским потоком")
+Person(user_analyst, "BI-аналитик", "Строит отчёты в портале самообслуживания")
+Person(user_fintech, "Клиент банка", "Пользуется финтех-сервисами")
+
+System_Boundary(enterprise, "Предприятие «Будущее 2.0» (Enterprise)") {
+
+    ' === ДОМЕН: МЕДИЦИНА (Core Domain) ===
+    Boundary(medical, "Домен «Медицина» (Core Domain)") {
+        Boundary(bc_patient, "«Пациентский поток» (Bounded Context)") {
+            Container(med_app, "Patient Flow Service", "Golang / K8s", "Запись, приёмы, расписание")
+            ContainerDb(med_db, "Patient DB", "PostgreSQL", "Пациенты, записи, посещения")
+        }
+        Boundary(bc_record, "«Медицинская карта» (Bounded Context)") {
+            Container(record_app, "Medical Record Service", "Golang", "ЭМК, диагнозы, анамнез")
+            ContainerDb(record_db, "Record DB", "PostgreSQL", "Мед. карты, диагнозы")
+            ContainerDb(record_storage, "Object Storage", "S3", "DICOM-снимки, вложения")
+        }
+        Container(med_events, "Medical Event Publisher", "Kafka Producer", "PatientRegistered, VisitCompleted, DiagnosisMade")
+    }
+
+    ' === ДОМЕН: ФИНТЕХ (Core Domain) ===
+    Boundary(fintech, "Домен «Финтех» (Core Domain)") {
+        Boundary(bc_fintech, "«Финансовые сервисы» (Bounded Context)") {
+            Container(fin_app, "Fintech Core Service", "Golang + Java", "Счета, кредиты, платежи")
+            ContainerDb(fin_db, "Fintech DB", "PostgreSQL", "Счета, договоры, транзакции")
+        }
+        Container(fin_events, "Fintech Event Publisher", "Kafka Producer", "CreditAgreementCreated, PaymentProcessed")
+    }
+
+    ' === ДОМЕН: ИИ (Supporting Subdomain) ===
+    Boundary(ai, "Домен «ИИ-сервисы» (Supporting Subdomain)") {
+        Boundary(bc_ai, "«ИИ-диагностика» (Bounded Context)") {
+            Container(ai_app, "AI Diagnostics Service", "Python / MLflow", "Анализ снимков и данных")
+            ContainerDb(ai_model, "Model Registry", "MLflow + S3", "Версии моделей и артефакты")
+        }
+        Container(ai_events, "AI Event Publisher", "Kafka Producer", "AIStudyCompleted")
+    }
+
+    ' === СКВОЗНАЯ ПЛАТФОРМА ДАННЫХ (Generic Subdomain) ===
+    Boundary(data_platform, "Сквозная платформа данных (Generic Subdomain)") {
+        Container(event_bus, "Event Bus", "Apache Kafka", "Событийная магистраль")
+        Container(schema_reg, "Schema Registry", "Confluent", "Каталог схем (Avro/Protobuf)")
+        Container(data_catalog, "Data Catalog", "DataHub", "Метаданные, глоссарий, lineage")
+        ContainerDb(stream_dw, "Streaming DW", "ClickHouse + Iceberg", "Витрины данных по доменам")
+        Container(selfservice, "Self-Service BI Portal", "Superset / Trino", "Портал самообслуживания")
+    }
+
+    ' === LEGACY (миграционные мосты) ===
+    Boundary(legacy, "Legacy-мосты (временные)") {
+        ContainerDb(legacy_dwh, "Legacy DWH", "MS SQL Server 2008", "CDC → Kafka")
+        Container(legacy_esb, "Legacy ESB", "Apache Camel", "Синхронные вызовы → события")
+    }
+}
+
+' === Внешние системы ===
+System_Ext(pharma, "Фарма-партнёры", "Будущая интеграция")
+System_Ext(devices, "Мед. оборудование", "Потоки с устройств")
+System_Ext(regulator, "Регулятор (152-ФЗ, ЦБ)", "Требования к данным")
+
+' === Связи ===
+Rel(user_patient, med_app, "Запись на приём")
+Rel(user_doctor, med_app, "Ведение приёмов")
+Rel(user_doctor, record_app, "Работа с ЭМК")
+Rel(user_operator, med_app, "Пациентский поток")
+Rel(user_fintech, fin_app, "Фин. операции")
+Rel(user_analyst, selfservice, "Построение отчётов")
+
+Rel(med_app, med_db, "Чтение/Запись")
+Rel(record_app, record_db, "Чтение/Запись")
+Rel(record_app, record_storage, "Загрузка/чтение снимков")
+Rel(fin_app, fin_db, "Чтение/Запись")
+Rel(ai_app, ai_model, "Загрузка моделей")
+Rel(ai_app, record_storage, "Чтение снимков для анализа")
+
+Rel(med_app, med_events, "Публикует события")
+Rel(record_app, med_events, "Публикует события")
+Rel(fin_app, fin_events, "Публикует события")
+Rel(ai_app, ai_events, "Публикует события")
+
+Rel(med_events, event_bus, "Публикация событий")
+Rel(fin_events, event_bus, "Публикация событий")
+Rel(ai_events, event_bus, "Публикация событий")
+
+Rel(event_bus, schema_reg, "Валидация схем")
+Rel(event_bus, stream_dw, "Потоковая загрузка")
+Rel(stream_dw, selfservice, "SQL-запросы через Trino")
+Rel(data_catalog, stream_dw, "Метаданные и lineage")
+
+Rel(legacy_dwh, event_bus, "CDC → события")
+Rel(legacy_esb, event_bus, "Миграция вызовов")
+
+Rel(med_app, pharma, "Интеграция (будущее)")
+Rel(med_app, devices, "Поток с устройств")
+Rel(selfservice, regulator, "Отчётность / аудит")
+
+@enduml

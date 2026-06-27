@@ -1,10 +1,14 @@
 @startuml
 !NEW_C4_STYLE=1
-!theme C4_sandstone from <C4/themes>
+!theme C4Language_russian from https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/themes
+' !theme C4_sandstone from <C4/themes>
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
 SHOW_PERSON_OUTLINE()
-LAYOUT_LANDSCAPE()
+' LAYOUT_LEFT_RIGHT()
+' LAYOUT_LANDSCAPE()
+
+
 title C4 — Component Diagram\nSelf-Service BI Portal\n(Портал самообслуживания для бизнес-пользователей)
 
 ' === Внешние пользователи ===
@@ -17,6 +21,8 @@ Container(stream_dw, "Streaming DW", "ClickHouse + Iceberg", "Витрины д�
 Container(data_catalog, "Data Catalog", "DataHub", "Метаданные, глоссарий, lineage")
 Container(event_bus, "Event Bus", "Apache Kafka", "События изменения данных")
 ContainerDb(legacy_dwh, "Legacy DWH", "MS SQL Server 2008", "Временный доступ через CDC")
+
+
 
 ' === Self-Service BI Portal (контейнер) ===
 Container_Boundary(bi_portal, "Self-Service BI Portal") {
@@ -38,6 +44,15 @@ Container_Boundary(bi_portal, "Self-Service BI Portal") {
     Component(audit_logger, "Audit Logger", "ELK Stack", "Логирование действий для compliance")
     
     ComponentDb(cache_layer, "Cache Layer", "Redis", "Кэш результатов запросов, сессии")
+
+
+
+    note left of query_engine
+      **Federation:**
+      Trino объединяет данные
+      из Streaming DW и Legacy DWH
+      в единый SQL-запрос
+    end note
 }
 
 ' === Связи: Пользователи → Портал ===
@@ -77,7 +92,7 @@ Rel(auth_service, audit_logger, "Логирование доступов")
 Rel(event_bus, metadata_service, "Подписка на события", "Изменения в витринах")
 
 ' === Примечания ===
-note right of bi_portal
+note top of bi_portal
   **Важно:**
   Медицинские карты, истории болезней
   и результаты исследований
@@ -85,11 +100,5 @@ note right of bi_portal
   (требование 152-ФЗ)
 end note
 
-note bottom of query_engine
-  **Federation:**
-  Trino объединяет данные
-  из Streaming DW и Legacy DWH
-  в единый SQL-запрос
-end note
-
+' LAYOUT_WITH_LEGEND()
 @enduml
